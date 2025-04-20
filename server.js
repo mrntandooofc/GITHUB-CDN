@@ -8,6 +8,7 @@ const fs = require('fs');
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
+app.use(express.static('public'));
 const octokit = new Octokit({ 
   auth: process.env.GITHUB_TOKEN,
   userAgent: 'GitCDN v1.0'
