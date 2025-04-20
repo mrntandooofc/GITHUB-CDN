@@ -1,45 +1,46 @@
-// server.js
+require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const { Octokit } = require('@octokit/rest');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
-app.use(express.static('public'));
-const octokit = new Octokit({ 
+const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
   userAgent: 'GitCDN v1.0'
 });
 
-const REPO_OWNER = 'mrfr8nk';
-const REPO_NAME = 'GITHUB-CDN-FILES';
-const BRANCH = 'main';
+const REPO_OWNER = process.env.REPO_OWNER;
+const REPO_NAME  = process.env.REPO_NAME;
+const BRANCH     = process.env.BRANCH || 'main';
+
+app.use(express.static('public'));
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const file = req.file;
-    const fileContent = fs.readFileSync(file.path);
-    const fileName = `${Date.now()}-${file.originalname}`;
-    
+    const file     = req.file;
+    const buf      = fs.readFileSync(file.path);
+    const name     = `${Date.now()}-${file.originalname}`;
+    const filePath = `uploads/${name}`;
+
     await octokit.repos.createOrUpdateFileContents({
-      owner: REPO_OWNER,
-      repo: REPO_NAME,
-      path: `uploads/${fileName}`,
-      message: `Upload ${fileName}`,
-      content: fileContent.toString('base64'),
-      branch: BRANCH
+      owner:   REPO_OWNER,
+      repo:    REPO_NAME,
+      path:    filePath,
+      message: `Upload ${name}`,
+      content: buf.toString('base64'),
+      branch:  BRANCH
     });
 
-    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/uploads/${fileName}`;
+    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${filePath}`;
+    fs.unlinkSync(file.path);
     res.json({ url: rawUrl });
-
-    fs.unlinkSync(file.path); // Cleanup
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Upload failed' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Upload failed' });
   }
 });
 
