@@ -1,17 +1,14 @@
 {
-  "name": "gitcdn-uploader",
+  "name": "github-cdn",
   "version": "1.0.0",
-  "description": "Express server to upload files to a GitHub repo using the GitHub API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["express", "github", "octokit", "file-upload", "cdn"],
-  "author": "Mr Frank",
-  "license": "MIT",
   "dependencies": {
     "@octokit/rest": "^20.0.0",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "multer": "^1.4.5-lts.1"
   },
