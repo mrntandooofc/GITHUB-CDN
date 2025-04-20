@@ -15,7 +15,7 @@ const octokit = new Octokit({
 });
 
 const REPO_OWNER = 'mrfr8nk';
-const REPO_NAME = 'GITHUB-CDN';
+const REPO_NAME = 'GITHUB-CDN-FILES';
 const BRANCH = 'main';
 
 app.post('/upload', upload.single('file'), async (req, res) => {
